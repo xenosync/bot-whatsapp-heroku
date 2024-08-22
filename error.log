@@ -1,0 +1,127 @@
+[20/08/24 18:09:59] - Error: rate-overlimit
+    at assertNodeErrorFree (/home/container/node_modules/@whiskeysockets/baileys/lib/WABinary/generic-utils.js:56:15)
+    at query (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:145:48)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at groupMetadata (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/groups.js:22:24)
+    at /home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:323:41
+    at async Promise.all (index 0)
+    at /home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:316:51
+    at Object.transaction (/home/container/node_modules/@whiskeysockets/baileys/lib/Utils/auth-utils.js:136:26)
+    at relayMessage (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:306:9)
+    at Object.sendMessage (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:664:17) {
+  data: 429,
+  isBoom: true,
+  isServer: true,
+  output: {
+    statusCode: 500,
+    payload: {
+      statusCode: 500,
+      error: 'Internal Server Error',
+      message: 'An internal server error occurred'
+    },
+    headers: {}
+  }
+}
+[21/08/24 04:28:04] - Connection error. (Reason: 503)
+[21/08/24 04:30:04] - Connection error. (Reason: 503)
+[21/08/24 04:41:49] - Connection error. (Reason: 503)
+[21/08/24 14:57:08] - [Error: ENOSPC: no space left on device, write] {
+  errno: -28,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+[21/08/24 14:57:08] - TypeError: Cannot destructure property 'user' of '(0 , WABinary_1.jidDecode)(...)' as it is undefined.
+    at relayMessage (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:277:17)
+    at Object.sendMessage (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:664:23)
+    at module.exports (/home/container/handler.js:179:11)
+[21/08/24 16:19:31] - Error: rate-overlimit
+    at assertNodeErrorFree (/home/container/node_modules/@whiskeysockets/baileys/lib/WABinary/generic-utils.js:56:15)
+    at query (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:145:48)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at groupMetadata (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/groups.js:22:24)
+    at /home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:323:41
+    at async Promise.all (index 0)
+    at /home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:316:51
+    at Object.transaction (/home/container/node_modules/@whiskeysockets/baileys/lib/Utils/auth-utils.js:136:26)
+    at relayMessage (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:306:9)
+    at Object.sendMessage (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:664:17) {
+  data: 429,
+  isBoom: true,
+  isServer: true,
+  output: {
+    statusCode: 500,
+    payload: {
+      statusCode: 500,
+      error: 'Internal Server Error',
+      message: 'An internal server error occurred'
+    },
+    headers: {}
+  }
+}
+[21/08/24 18:48:26] - [Error: ENOSPC: no space left on device, write] {
+  errno: -28,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+[21/08/24 18:48:26] - TypeError: Cannot destructure property 'user' of '(0 , WABinary_1.jidDecode)(...)' as it is undefined.
+    at relayMessage (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:277:17)
+    at Object.sendMessage (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:664:23)
+    at module.exports (/home/container/handler.js:179:11)
+[21/08/24 22:58:18] - Error: rate-overlimit
+    at assertNodeErrorFree (/home/container/node_modules/@whiskeysockets/baileys/lib/WABinary/generic-utils.js:56:15)
+    at query (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:145:48)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at groupMetadata (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/groups.js:22:24)
+    at /home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:323:41
+    at async Promise.all (index 0)
+    at /home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:316:51
+    at Object.transaction (/home/container/node_modules/@whiskeysockets/baileys/lib/Utils/auth-utils.js:136:26)
+    at relayMessage (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:306:9)
+    at Object.sendMessage (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:664:17) {
+  data: 429,
+  isBoom: true,
+  isServer: true,
+  output: {
+    statusCode: 500,
+    payload: {
+      statusCode: 500,
+      error: 'Internal Server Error',
+      message: 'An internal server error occurred'
+    },
+    headers: {}
+  }
+}
+[21/08/24 23:00:07] - Error: Media upload failed on all hosts
+    at Object.upload (/home/container/node_modules/@whiskeysockets/baileys/lib/Utils/messages-media.js:577:19)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at /home/container/node_modules/@whiskeysockets/baileys/lib/Utils/messages.js:122:28
+    at async Promise.all (index 0)
+    at prepareWAMessageMedia (/home/container/node_modules/@whiskeysockets/baileys/lib/Utils/messages.js:120:40)
+    at generateWAMessageContent (/home/container/node_modules/@whiskeysockets/baileys/lib/Utils/messages.js:415:13)
+    at generateWAMessage (/home/container/node_modules/@whiskeysockets/baileys/lib/Utils/messages.js:507:59)
+    at Object.sendMessage (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:619:33)
+    at Object.async (/home/container/plugins/ai/jadizombie.js:31:1)
+    at module.exports (/home/container/handler.js:179:11) {
+  data: null,
+  isBoom: true,
+  isServer: true,
+  output: {
+    statusCode: 500,
+    payload: {
+      statusCode: 500,
+      error: 'Internal Server Error',
+      message: 'An internal server error occurred'
+    },
+    headers: {}
+  }
+}
+[21/08/24 23:00:07] - TypeError: Cannot destructure property 'user' of '(0 , WABinary_1.jidDecode)(...)' as it is undefined.
+    at relayMessage (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:277:17)
+    at Object.sendMessage (/home/container/node_modules/@whiskeysockets/baileys/lib/Socket/messages-send.js:664:23)
+    at module.exports (/home/container/handler.js:179:11)
+[22/08/24 01:01:49] - Connection closed, reconnecting . . .
+[22/08/24 01:44:35] - Connection closed, reconnecting . . .
+[22/08/24 03:09:08] - Connection closed, reconnecting . . .
+[22/08/24 04:30:00] - Connection error. (Reason: 503)
+[22/08/24 04:45:30] - Connection error. (Reason: 503)
+[22/08/24 05:12:27] - Connection closed, reconnecting . . .
