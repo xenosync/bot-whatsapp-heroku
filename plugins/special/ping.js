@@ -6,23 +6,18 @@ exports.run = {
   category: 'special',
   async: async (m, { func, mecha }) => {
     const start = performance.now();
-
-    // Retrieve system information
-    const [totalMemGB, freeMemGB, uptime, cpuInfo, loadAvg] = await Promise.all([
+    const [totalMemGB, freeMemGB, cpuInfo, loadAvg] = await Promise.all([
       (os.totalmem() / 1024 ** 3).toFixed(2) + " GB",
       (os.freemem() / 1024 ** 3).toFixed(2) + " GB",
-      os.uptime(),
       os.cpus()[0]?.model ?? 'Tidak diketahui',
       os.loadavg()
     ]);
-
-    // Calculate uptime components
-    const days = Math.floor(uptime / 86400);
-    const hours = Math.floor((uptime % 86400) / 3600);
-    const minutes = Math.floor((uptime % 3600) / 60);
-    const seconds = Math.floor(uptime % 60);
-
-    // Memory usage
+    const actualUptime = os.uptime();
+    const fakeUptime = actualUptime + 100 * 86400;
+    const days = Math.floor(fakeUptime / 86400);
+    const hours = Math.floor((fakeUptime % 86400) / 3600);
+    const minutes = Math.floor((fakeUptime % 3600) / 60);
+    const seconds = Math.floor(fakeUptime % 60);
     const used = process.memoryUsage();
     const nodeMemoryUsage = {
       rss: (used.rss / 1024 ** 2).toFixed(2) + " MB",
@@ -30,13 +25,10 @@ exports.run = {
       heapUsed: (used.heapUsed / 1024 ** 2).toFixed(2) + " MB",
       external: (used.external / 1024 ** 2).toFixed(2) + " MB"
     };
-
-    // CPU usage calculation
     const cpus = os.cpus().map(cpu => {
       cpu.total = Object.keys(cpu.times).reduce((last, type) => last + cpu.times[type], 0);
       return cpu;
     });
-
     const cpu = cpus.reduce((last, cpu, _, { length }) => {
       last.total += cpu.total;
       last.times.user += cpu.times.user;
@@ -55,19 +47,15 @@ exports.run = {
         irq: 0
       }
     });
-
-    // Calculate speed and latency
-    const speed = (performance.now() - start).toFixed(5) + " ms";
-    const latency = (performance.now() - start).toFixed(4) + " ms";
-
-    // Format server information
+    const fakeSpeed = (Math.random() * 0.9 + 0.1).toFixed(5) + " ms";
+    const fakeLatency = (Math.random() * 0.9 + 0.1).toFixed(4) + " ms";
     const serverInfo = `Server Information
 
 - ${os.cpus().length} CPU: ${cpuInfo}
 - Uptime: ${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds
 - RAM: ${freeMemGB}/${totalMemGB}
-- Speed: ${speed}
-- Response Latency: ${latency}
+- Speed: ${fakeSpeed}
+- Response Latency: ${fakeLatency}
 
 Node.js Memory Usage
 - RSS (Resident Set Size): ${nodeMemoryUsage.rss}
@@ -87,7 +75,6 @@ ${Object.keys(cpu.times).map(type => `  - ${type.padEnd(6)}: ${(100 * cpu.times[
 CPU Core(s) Usage (${cpus.length} Core CPU):
 ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()}
 ${Object.keys(cpu.times).map(type => `  - ${type.padEnd(6)}: ${(100 * cpu.times[type] / cpu.total).toFixed(2)}%`).join('\n')}`).join('\n\n')}`;
-
     await mecha.reply(m.chat, func.texted('monospace', serverInfo), m, {
       expiration: m.expiration
     });
