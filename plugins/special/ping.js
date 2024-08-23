@@ -6,12 +6,10 @@ exports.run = {
   category: 'special',
   async: async (m, { func, mecha }) => {
     const start = performance.now();
-    const [totalMemGB, freeMemGB, cpuInfo, loadAvg] = await Promise.all([
-      (os.totalmem() / 1024 ** 3).toFixed(2) + " GB",
-      (os.freemem() / 1024 ** 3).toFixed(2) + " GB",
-      os.cpus()[0]?.model ?? 'Tidak diketahui',
-      os.loadavg()
-    ]);
+    const totalMemGB = (os.totalmem() / 1024 ** 3).toFixed(2);
+    const freeMemGB = (os.freemem() / 1024 ** 3).toFixed(2);
+    const cpuInfo = os.cpus()[0]?.model ?? 'Tidak diketahui';
+    const loadAvg = os.loadavg();
     const actualUptime = os.uptime();
     const fakeUptime = actualUptime + 100 * 86400;
     const days = Math.floor(fakeUptime / 86400);
@@ -26,17 +24,17 @@ exports.run = {
       external: (used.external / 1024 ** 2).toFixed(2) + " MB"
     };
     const cpus = os.cpus().map(cpu => {
-      cpu.total = Object.keys(cpu.times).reduce((last, type) => last + cpu.times[type], 0);
+      cpu.total = Object.values(cpu.times).reduce((last, type) => last + type, 0);
       return cpu;
     });
-    const cpu = cpus.reduce((last, cpu, _, { length }) => {
-      last.total += cpu.total;
-      last.times.user += cpu.times.user;
-      last.times.nice += cpu.times.nice;
-      last.times.sys += cpu.times.sys;
-      last.times.idle += cpu.times.idle;
-      last.times.irq += cpu.times.irq;
-      return last;
+    const cpu = cpus.reduce((acc, cpu) => {
+      acc.total += cpu.total;
+      acc.times.user += cpu.times.user;
+      acc.times.nice += cpu.times.nice;
+      acc.times.sys += cpu.times.sys;
+      acc.times.idle += cpu.times.idle;
+      acc.times.irq += cpu.times.irq;
+      return acc;
     }, {
       total: 0,
       times: {
@@ -53,7 +51,7 @@ exports.run = {
 
 - ${os.cpus().length} CPU: ${cpuInfo}
 - Uptime: ${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds
-- RAM: ${freeMemGB}/${totalMemGB}
+- RAM: ${freeMemGB}/${totalMemGB} GB
 - Speed: ${fakeSpeed}
 - Response Latency: ${fakeLatency}
 
