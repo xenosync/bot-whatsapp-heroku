@@ -23,7 +23,7 @@
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
     "@hapi/boom": "^10.0.0",
-    "@whiskeysockets/baileys": "npm:@whiskeysockets/baileys@6.6.0",
+    "@whiskeysockets/baileys": "npm:@whiskeysockets/baileys@6.7.7",
     "acrcloud": "^1.4.0",
     "archiver": "^6.0.2",
     "awesome-phonenumber": "^2.64.0",
