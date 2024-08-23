@@ -45,7 +45,7 @@ const socket = new Baileys({
     },
     session: 'session',
     online: true,
-    version: [2, 3000, 1015901307]
+    version: [2, 3000, 1015901307],
     browser: ['Windows', 'Chrome', '20.0.04']
 });
 
