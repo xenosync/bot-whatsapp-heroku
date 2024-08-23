@@ -25,8 +25,8 @@ if (isNaN(user.balance)) user.balance = 0;
 if (isNaN(user.limit)) user.limit = setting.limit;
 });
 
-groups.forEach(group => {
-if (isNaN(group.sewa.expired)) group.sewa.expired = 0;
+if (m.isGc && groups) groups.forEach(group => {
+if (group.sewa && isNaN(group.sewa.expired)) group.sewa.expired = 0;
 });
 
 const roles = {
