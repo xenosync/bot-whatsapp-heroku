@@ -1,71 +1,89 @@
 const axios = require('axios');
-const crypto = require('crypto');
-const generateSessionToken = () => crypto.randomBytes(16).toString('hex');
-const fetchAIResponse = async (prompt) => {
-    const sessionToken = generateSessionToken();
+const Groq = require('groq-sdk');
+const fs = require('fs');
+const path = require('path');
+const apiKey = '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';
+const groq = new Groq({ apiKey: apiKey });
+const dataFilePath = path.join(__dirname, 'conversations.json');
+const cleanResponse = (text) => text.replace(/\*\*/g, '*').replace(/_/g, '').replace(/`|```/g, '').trim();
+
+const saveMessage = (sessionId, role, content) => {
+    let conversations = {};
+    if (fs.existsSync(dataFilePath)) {
+        const data = fs.readFileSync(dataFilePath);
+        conversations = JSON.parse(data);
+    }
+    if (!conversations[sessionId]) {
+        conversations[sessionId] = [];
+    }
+    conversations[sessionId].push({ role, content });
+    fs.writeFileSync(dataFilePath, JSON.stringify(conversations, null, 2));
+};
+
+const getConversationHistory = (sessionId) => {
+    if (fs.existsSync(dataFilePath)) {
+        const data = fs.readFileSync(dataFilePath);
+        const conversations = JSON.parse(data);
+        return conversations[sessionId] || [];
+    }
+    return [];
+};
+
+const ai = async (sessionId, userMessage) => {
+    const history = getConversationHistory(sessionId);
+    const messages = [
+        { role: 'system', content: 'Kamu adalah asisten AI yang sangat canggih dan profesional, bahasa yang selalu kamu gunakan adalah bahasa Indonesia.' },
+        ...history,
+        { role: 'user', content: userMessage }
+    ];
     try {
-        await axios.post("https://thobuiq-gpt-4o.hf.space/run/predict?__theme=light", { //register prompt and initiate request
-            data: [{ text: prompt, files: [] }],
-            event_data: null,
-            fn_index: 3,
-            session_hash: sessionToken,
-            trigger_id: 18,
-        }, {
-            headers: {
-                Origin: "https://thobuiq-gpt-4o.hf.space",
-                "User-Agent": "Mozilla/5.0",
-            },
+        const chatCompletion = await groq.chat.completions.create({
+            messages: messages,
+            model: 'llama3-70b-8192',
+            temperature: 0.7,
+            max_tokens: 4000,
+            top_p: 1,
+            stream: true,
+            stop: null
         });
-        await axios.post("https://thobuiq-gpt-4o.hf.space/queue/join?__theme=light", { //join the processing queue
-            data: [null, null, "idefics2-8b-chatty", "Greedy", 0.7, 4096, 1, 0.9],
-            event_data: null,
-            fn_index: 5,
-            session_hash: sessionToken,
-            trigger_id: 18,
-        }, {
-            headers: {
-                Origin: "https://thobuiq-gpt-4o.hf.space",
-                "User-Agent": "Mozilla/5.0",
-            },
-        });        
-        const response = await axios.get(`https://thobuiq-gpt-4o.hf.space/queue/data?${new URLSearchParams({ session_hash: sessionToken })}`, { //stream and process the response
-            headers: {
-                Accept: "text/event-stream",
-                "User-Agent": "Mozilla/5.0",
-            },
-            responseType: 'stream',
-        });
-        return new Promise((resolve, reject) => {
-            response.data.on('data', (chunk) => {
-                const data = JSON.parse(chunk.toString().split("data: ")[1] || '{}');
-                if (data.msg === 'process_completed') {
-                    const result = data.output?.data[0][0][1] || 'Failed to get response.';
-                    resolve(result);
-                }
-            });
-            response.data.on('error', (err) => reject(`Stream error: ${err.message}`));
-        });
+        let aiResponse = '';
+        for await (const chunk of chatCompletion) {
+            aiResponse += chunk.choices[0]?.delta?.content || '';
+        }
+        saveMessage(sessionId, 'assistant', aiResponse);
+        return cleanResponse(aiResponse);
     } catch (error) {
-        throw new Error(`Failed to fetch AI response: ${error.message}`);
+        console.error('Error generating AI response:', error);
+        return `Error: ${error.message}\nStack: ${error.stack}`;
     }
 };
-const processAIRequest = async (m, mecha) => {
-    if (!m.text) {
-        return m.reply('Please provide a clear question or command.');
-    }
-    mecha.sendReact(m.chat, '🕒', m.key);
+
+const processRequest = async (m, mecha) => {
+    if (!m.text || typeof m.text !== 'string') return m.reply('Berikan pertanyaan atau perintah yang jelas.');
+    await mecha.sendReact(m.chat, '🕒', m.key);
+    const sessionId = m.sender;
     try {
-        const responseText = await fetchAIResponse(m.text);
-        mecha.reply(m.chat, responseText, m);
+        const aiResponse = await ai(sessionId, m.text);
+        await mecha.sendReact(m.chat, '✅', m.key);
+        return `*[ LLAMA3-70B-8192 ]*\n\n${aiResponse}`;
     } catch (error) {
-        mecha.reply(m.chat, `An error occurred: ${error.message}`, m);
+        await mecha.sendReact(m.chat, '❌', m.key);
+        return `Terjadi kesalahan: ${error.message}\nStack: ${error.stack}`;
     }
 };
+
 exports.run = {
     usage: [],
     hidden: ['ai2'],
     use: 'question',
     category: 'ai',
-    async: (m, { func, mecha }) => processAIRequest(m, mecha),
+    async: async (m, { func, mecha }) => {
+        try {
+            const replyText = await processRequest(m, mecha);
+            mecha.reply(m.chat, replyText, m);
+        } catch (error) {
+            mecha.reply(m.chat, `Terjadi kesalahan: ${error.message}\nStack: ${error.stack}`, m);
+        }
+    },
     limit: true
 };
