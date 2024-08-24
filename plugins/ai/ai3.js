@@ -1,8 +1,6 @@
 const axios = require('axios');
 const memory = {};
-
 const cleanResponse = (text) => text.replace(/\*\*/g, '*').replace(/_/g, '').replace(/`|```/g, '').trim();
-
 const getCurrentJakartaTime = () => new Date(Date.now() + (7 * 60 + new Date().getTimezoneOffset()) * 60000)
     .toISOString().replace('T', ' ').split('.')[0];
 
@@ -42,7 +40,7 @@ const processRequest = async (m, mecha) => {
     await mecha.sendReact(m.chat, '✅', m.key);
     memory[userId].push({ role: 'ai', content: responseText });
     if (memory[userId].length > 6) memory[userId].shift();
-    return `*[ AI3 RESPONSE ]*\n\n${responseText}`;
+    return `*[ CHATGPT COMPLETIONS ]*\n\n${responseText}`;
 };
 
 exports.run = {
