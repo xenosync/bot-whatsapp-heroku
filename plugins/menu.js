@@ -14,20 +14,12 @@ exports.run = {
     const hit_today = func.formatNumber(Object.entries(global.db.statistic).map((v) => v[1].hittoday).reduce((a, b) => a + b));
     const total_hit = func.formatNumber(Object.entries(global.db.statistic).map((v) => v[1].hit).reduce((a, b) => a + b));
     const style = setting.style;
-    const message = `Hi ${m.pushname},
-
-Saya adalah sebuah sistem otomatis (WhatsApp Bot) yang dapat membantu untuk melakukan sesuatu, mencari dan mendapatkan data/informasi hanya melalui WhatsApp.
-
-Database: ${typedb}
+    const message = `Database: ${typedb}
 Library: @whiskeysockets/baileys
 Version: ${version}
 Total Fitur: ${func.totalFeature(plugins)}
-Hit Today: ${hit_today}
-Total Hit: ${total_hit}
 Memory Used: ${func.fileSize(process.memoryUsage().rss)} / ${(process.env.SERVER_MEMORY != undefined && process.env.SERVER_MEMORY != 0) ? process.env.SERVER_MEMORY + ' MB' : '∞'}
-Platform: ${process.platform + ' ' + process.arch}
-
-Hubungi owner jika menemukan kesalahan atau ingin meningkatkan paket premium.`;
+Platform: ${process.platform + ' ' + process.arch}`;
 
     try {
       let filter = Object.entries(plugins).filter(([_, v]) => v.run?.usage)
