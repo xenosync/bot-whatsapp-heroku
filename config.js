@@ -40,7 +40,7 @@ number: '6285651915144' // ubah jadi nomor bot lu
 // apikey fitur quickchat
 global.quoteApi = 'https://bot.lyo.su/quote/generate'
 // url database mongodb (daftar di https://www.mongodb.com/)
-global.mongoUrl = '';
+global.mongoUrl = 'mongodb+srv://dwiyabintangh:kLEIWXrDQYPaMc3p@cluster0.qk7l0.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 // setting message
 global.mess = {
 wait: 'Processed . . .',
