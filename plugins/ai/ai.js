@@ -1,10 +1,6 @@
 const axios = require('axios');
 const memory = {};
-
 const cleanResponse = (text) => text.replace(/\*\*/g, '*').replace(/_/g, '').replace(/`|```/g, '').trim();
-
-const getCurrentJakartaTime = () => new Date(Date.now() + (7 * 60 + new Date().getTimezoneOffset()) * 60000)
-    .toISOString().replace('T', ' ').split('.')[0];
 
 const apiRequest = async (options) => {
     try {
@@ -18,7 +14,6 @@ const apiRequest = async (options) => {
 const processRequest = async (m, mecha) => {
     if (!m.text || typeof m.text !== 'string') return m.reply('Berikan pertanyaan atau perintah yang jelas.');
     await mecha.sendReact(m.chat, '🕒', m.key);
-    const formattedDate = getCurrentJakartaTime();
     const userId = m.sender;
     if (!memory[userId]) memory[userId] = [];
     memory[userId].push({ role: 'user', content: m.text });
@@ -27,7 +22,7 @@ const processRequest = async (m, mecha) => {
     const commonParams = {
         apikey: 'syauqi27',
         text: m.text,
-        system: `Kamu adalah asisten AI yang sangat canggih dan profesional. Tanggal dan waktu saat ini di zona waktu Jakarta/Asia adalah ${formattedDate}. Gunakan informasi ini jika relevan dengan pertanyaan pengguna.\nPercakapan sebelumnya:\n${conversationHistory}`
+        system: `Kamu adalah asisten AI yang sangat canggih dan profesional.\nPercakapan sebelumnya:\n${conversationHistory}`
     };
     const apiOptions = {
         method: 'GET',
