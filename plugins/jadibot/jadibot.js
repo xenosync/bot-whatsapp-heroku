@@ -4,7 +4,7 @@ const chalk = require('chalk');
 const { Jadibot, StopJadibot } = new (require('../../system/jadibot.js'));
 
 exports.run = {
-usage: ['jadibot', 'stopbot'],
+usage: ['jadibot'],
 category: 'jadibot',
 async: async (m, { func, mecha, plugins, users }) => {
 switch (m.command) {
