@@ -4,9 +4,24 @@ const fs = require('fs');
 const path = require('path');
 const apiKey = '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';
 const groq = new Groq({ apiKey: apiKey });
-const dataFilePath = path.join(__dirname, 'conversations.json');
+const dataFilePath = path.join(__dirname, 'conversations2.json');
 const cleanResponse = (text) => text.replace(/\*\*/g, '*').replace(/_/g, '').replace(/`|```/g, '').trim();
 
+// Fungsi untuk menghapus memori setelah 10 menit
+const deleteMemory = (sessionId) => {
+    let conversations = {};
+    if (fs.existsSync(dataFilePath)) {
+        const data = fs.readFileSync(dataFilePath);
+        conversations = JSON.parse(data);
+    }
+    if (conversations[sessionId]) {
+        delete conversations[sessionId];
+        fs.writeFileSync(dataFilePath, JSON.stringify(conversations, null, 2));
+        console.log(`Memory for session ${sessionId} has been deleted due to inactivity.`);
+    }
+};
+
+// Simpan pesan ke dalam memori
 const saveMessage = (sessionId, role, content) => {
     let conversations = {};
     if (fs.existsSync(dataFilePath)) {
@@ -18,6 +33,9 @@ const saveMessage = (sessionId, role, content) => {
     }
     conversations[sessionId].push({ role, content });
     fs.writeFileSync(dataFilePath, JSON.stringify(conversations, null, 2));
+
+    // Set timeout untuk menghapus memori setelah 10 menit
+    setTimeout(() => deleteMemory(sessionId), 10 * 60 * 1000); // 10 menit dalam milidetik
 };
 
 const getConversationHistory = (sessionId) => {
@@ -41,7 +59,7 @@ const ai = async (sessionId, userMessage) => {
             messages: messages,
             model: 'llama-3.1-70b-versatile',
             temperature: 0.7,
-            max_tokens: 4000,
+            max_tokens: 5000,
             top_p: 1,
             stream: true,
             stop: null
