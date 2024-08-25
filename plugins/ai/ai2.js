@@ -39,7 +39,7 @@ const ai = async (sessionId, userMessage) => {
     try {
         const chatCompletion = await groq.chat.completions.create({
             messages: messages,
-            model: 'llama3-70b-8192',
+            model: 'llama-3.1-70b-versatile',
             temperature: 0.7,
             max_tokens: 4000,
             top_p: 1,
@@ -65,7 +65,7 @@ const processRequest = async (m, mecha) => {
     try {
         const aiResponse = await ai(sessionId, m.text);
         await mecha.sendReact(m.chat, '✅', m.key);
-        return `*[ LLAMA3-70B-8192 ]*\n\n${aiResponse}`;
+        return `*[ LLAMA-3.1-70B-VERSATILE ]*\n\n${aiResponse}`;
     } catch (error) {
         await mecha.sendReact(m.chat, '❌', m.key);
         return `Terjadi kesalahan: ${error.message}\nStack: ${error.stack}`;
