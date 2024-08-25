@@ -45,7 +45,7 @@ const processRequest = async (m, mecha) => {
 
 exports.run = {
     usage: [],
-    hidden: ['ai3'],
+    hidden: ['ai5'],
     use: 'question',
     category: 'ai',
     async: async (m, { func, mecha }) => {
