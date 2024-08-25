@@ -19,6 +19,16 @@ async function fetchVideoData(url) {
     }
 }
 
+const formatDuration = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+};
+
+const formatNumber = (num) => {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
+
 exports.run = {
     usage: ['play'],
     use: 'judul lagu',
@@ -34,12 +44,10 @@ exports.run = {
         const caption = `
 ∘ ID : ${video.videoId}
 ∘ Title : ${video.title}
-∘ Duration : ${video.timestamp}
-∘ Views : ${video.views}
+∘ Duration : ${formatDuration(video.seconds)}
+∘ Views : ${formatNumber(video.views)}
 ∘ Upload : ${video.ago}
 ∘ Author : ${video.author.name}
-∘ Channel : ${video.author.url}
-∘ Video URL : ${video.url}
 ∘ Description : ${video.description}
 
 _reply with number *1* to get audio_
@@ -61,7 +69,7 @@ _reply with number *3* to get document_
                 data: {
                     url: video.url,
                     thumbnail: video.image,
-                    duration: video.timestamp,
+                    duration: formatDuration(video.seconds),
                     title: video.title,
                     audio: fs.readFileSync(audioPath),
                     video: videoBuffer
@@ -127,5 +135,5 @@ _reply with number *3* to get document_
         }
     },
     restrict: true,
-    limit: 10
+    limit: 3
 };
