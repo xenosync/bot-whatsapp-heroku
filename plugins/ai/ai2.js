@@ -3,17 +3,13 @@ const Groq = require('groq-sdk');
 const fs = require('fs');
 const path = require('path');
 const apiKey = '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';
-const groq = new Groq({ apiKey: apiKey });
+const groq = new Groq({ apiKey });
 const dataFilePath = path.join(__dirname, 'conversations2.json');
-const cleanResponse = (text) => text.replace(/\*\*/g, '*').replace(/_/g, '').replace(/`|```/g, '').trim();
 
-// Fungsi untuk menghapus memori setelah 10 menit
-const deleteMemory = (sessionId) => {
-    let conversations = {};
-    if (fs.existsSync(dataFilePath)) {
-        const data = fs.readFileSync(dataFilePath);
-        conversations = JSON.parse(data);
-    }
+const cleanResponse = text => text.replace(/\*\*/g, '*').replace(/_/g, '').replace(/`|```/g, '').trim();
+
+const deleteMemory = sessionId => {
+    let conversations = fs.existsSync(dataFilePath) ? JSON.parse(fs.readFileSync(dataFilePath)) : {};
     if (conversations[sessionId]) {
         delete conversations[sessionId];
         fs.writeFileSync(dataFilePath, JSON.stringify(conversations, null, 2));
@@ -21,30 +17,16 @@ const deleteMemory = (sessionId) => {
     }
 };
 
-// Simpan pesan ke dalam memori
 const saveMessage = (sessionId, role, content) => {
-    let conversations = {};
-    if (fs.existsSync(dataFilePath)) {
-        const data = fs.readFileSync(dataFilePath);
-        conversations = JSON.parse(data);
-    }
-    if (!conversations[sessionId]) {
-        conversations[sessionId] = [];
-    }
+    let conversations = fs.existsSync(dataFilePath) ? JSON.parse(fs.readFileSync(dataFilePath)) : {};
+    if (!conversations[sessionId]) conversations[sessionId] = [];
     conversations[sessionId].push({ role, content });
     fs.writeFileSync(dataFilePath, JSON.stringify(conversations, null, 2));
-
-    // Set timeout untuk menghapus memori setelah 10 menit
-    setTimeout(() => deleteMemory(sessionId), 10 * 60 * 1000); // 10 menit dalam milidetik
+    setTimeout(() => deleteMemory(sessionId), 10 * 60 * 1000);
 };
 
-const getConversationHistory = (sessionId) => {
-    if (fs.existsSync(dataFilePath)) {
-        const data = fs.readFileSync(dataFilePath);
-        const conversations = JSON.parse(data);
-        return conversations[sessionId] || [];
-    }
-    return [];
+const getConversationHistory = sessionId => {
+    return fs.existsSync(dataFilePath) ? JSON.parse(fs.readFileSync(dataFilePath))[sessionId] || [] : [];
 };
 
 const ai = async (sessionId, userMessage) => {
@@ -54,22 +36,30 @@ const ai = async (sessionId, userMessage) => {
         ...history,
         { role: 'user', content: userMessage }
     ];
+
+    let totalTokens = 0;
     try {
+        const startTime = Date.now();
         const chatCompletion = await groq.chat.completions.create({
-            messages: messages,
+            messages,
             model: 'llama-3.1-70b-versatile',
             temperature: 0.7,
             max_tokens: 5000,
             top_p: 1,
-            stream: true,
-            stop: null
+            stream: true
         });
+
         let aiResponse = '';
         for await (const chunk of chatCompletion) {
             aiResponse += chunk.choices[0]?.delta?.content || '';
+            totalTokens += chunk.choices[0]?.delta?.content?.split(/\s+/).length || 0;
         }
+
+        const endTime = Date.now();
+        const inferenceTime = endTime - startTime;
+
         saveMessage(sessionId, 'assistant', aiResponse);
-        return cleanResponse(aiResponse);
+        return `${cleanResponse(aiResponse)}\n\n*Inference*: ${inferenceTime} ms\n*Tokens*: ${totalTokens}`;
     } catch (error) {
         console.error('Error generating AI response:', error);
         return `Error: ${error.message}\nStack: ${error.stack}`;
