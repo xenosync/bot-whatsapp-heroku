@@ -27,10 +27,16 @@ exports.run = {
       let res = response.data.result;
       let txt = `*TIKTOK - DOWNLOADER*\n◦  *Author*: ${res.author.nickname}\n◦  *Duration*: ${res.duration} seconds\n◦  *Views*: ${formatNumber(res.play_count)}\n◦  *Likes*: ${formatNumber(res.digg_count)}\n◦  *Comments*: ${formatNumber(res.comment_count)}\n◦  *Shares*: ${formatNumber(res.share_count)}\n◦  *Downloads*: ${formatNumber(res.download_count)}\n◦  *Title*: ${res.title || 'No Description'}`.trimEnd();
       if (res.duration === 0 && res.images && res.images.length > 0) {
-        txt = `*TIKTOK - SLIDE*\n- Total Images: ${res.images.length}\n\n_Please wait, the images are being sent..._`;
-        await mecha.sendMessage(m.chat, { text: txt }, { quoted: m, ephemeralExpiration: m.expiration });
-        await Promise.all(res.images.map(url => mecha.sendMessage(m.chat, { image: { url } }, { quoted: m, ephemeralExpiration: m.expiration })));
-        if (res.music) await mecha.sendMessage(m.chat, { audio: { url: res.music }, mimetype: 'audio/mpeg', ptt: false }, { quoted: m, ephemeralExpiration: m.expiration });
+        let slide_info = `*TIKTOK - SLIDE*\n◦  *Author*: ${res.author.nickname}\n◦  *Views*: ${formatNumber(res.play_count)}\n◦  *Likes*: ${formatNumber(res.digg_count)}\n◦  *Comments*: ${formatNumber(res.comment_count)}\n◦  *Shares*: ${formatNumber(res.share_count)}\n◦  *Downloads*: ${formatNumber(res.download_count)}\n◦  *Total Images*: ${res.images.length}\n◦  *Title*: ${res.title || 'No Description'}`.trimEnd();
+        await mecha.sendMessage(m.chat, { text: slide_info }, { quoted: m, ephemeralExpiration: m.expiration });
+
+        for (let url of res.images) {
+          await mecha.sendMessage(m.chat, { image: { url } }, { quoted: m, ephemeralExpiration: m.expiration });
+        }
+
+        if (res.music) {
+          await mecha.sendMessage(m.chat, { audio: { url: res.music }, mimetype: 'audio/mpeg', ptt: false }, { quoted: m, ephemeralExpiration: m.expiration });
+        }
       } else {
         await mecha.sendMessage(m.chat, { video: { url: res.hdplay || res.play }, caption: txt }, { quoted: m, ephemeralExpiration: m.expiration });
         if (res.music) await mecha.sendMessage(m.chat, { audio: { url: res.music }, mimetype: 'audio/mpeg', ptt: false }, { quoted: m, ephemeralExpiration: m.expiration });
