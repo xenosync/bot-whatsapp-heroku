@@ -97,12 +97,7 @@ exports.run = {
             const encryptedInfo = formatResponse(response);
 
             await mecha.sendReact(m.chat, '✅', m.key);
-            try {
-                await m.reply(obfuscatedCode); // Kirim pesan hasil enkripsi secara langsung
-            } catch (e) {
-                console.error("Gagal mengirim pesan langsung, mengirim link sebagai gantinya.");
-                await m.reply(encryptedInfo); // Kirim link jika pengiriman langsung gagal
-            }
+            await m.reply(encryptedInfo); // Kirim link hasil enkripsi
         } catch (e) {
             console.error(e);
             m.reply(`Terjadi kesalahan saat meng-enkrip pesan: ${e.message}`);
