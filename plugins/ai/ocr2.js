@@ -1,43 +1,28 @@
-const axios = require('axios');
-
-const formatOCRResult = (result) => {
-    return result
-        .replace(/\\r\\n/g, '\n')
-        .replace(/\\n/g, '\n')
-        .replace(/^\s*[\r\n]/gm, '');
-};
-
+const axios = require('axios'), { fromBuffer } = require('file-type');
 exports.run = {
-    usage: ['ocr2'],
-    use: 'reply photo',
-    category: 'convert',
-    async: async (m, { func, mecha, quoted }) => {
+    usage: ['ocr2'], use: 'reply photo', category: 'convert', async: async (m, { func, mecha, quoted }) => {
         if (/image/.test(quoted.mime)) {
             let wait = await mecha.sendMessage(m.chat, { text: global.mess.wait }, { quoted: m, ephemeralExpiration: m.expiration });
-            let media = await mecha.downloadAndSaveMediaMessage(quoted);
-            let anu = await func.telegraPh(media);
+            let media = await mecha.downloadAndSaveMediaMessage(m), anu;
             try {
-                const ocrResult = await axios.post('https://api.itsrose.rest/image/ocr', {
-                    init_image: anu.url
-                }, {
+                anu = await func.telegraPh(media);
+                if (!anu.url) throw new Error('Upload gagal');
+            } catch (e) {
+                return await mecha.sendMessage(m.chat, { text: `Upload gagal: ${e.message}` }, { quoted: m, ephemeralExpiration: m.expiration });
+            }
+            try {
+                const { data } = await axios.get('https://image-to-text30.p.rapidapi.com/api/rapidapi/image-to-text', {
+                    params: { url: anu.url },
                     headers: {
-                        'accept': 'application/json',
-                        'Authorization': 'Rk-620098cf43375ac5ae53e52f6085076b',
-                        'Content-Type': 'application/json'
+                        'x-rapidapi-key': '1e30005f51msh6c612a2bd86806dp1dbed2jsne6909db8e4c9',
+                        'x-rapidapi-host': 'image-to-text30.p.rapidapi.com'
                     }
                 });
-                if (ocrResult.data.status) {
-                    const formattedResult = formatOCRResult(ocrResult.data.result.text);
-                    await mecha.sendMessage(m.chat, { text: formattedResult, edit: wait.key }, { quoted: m, ephemeralExpiration: m.expiration });
-                } else {
-                    await mecha.sendMessage(m.chat, { text: 'Tidak dapat memproses gambar.' }, { quoted: m, ephemeralExpiration: m.expiration });
-                }
-            } catch {
-                await mecha.sendMessage(m.chat, { text: 'Terjadi kesalahan dalam proses OCR.' }, { quoted: m, ephemeralExpiration: m.expiration });
+                await mecha.sendMessage(m.chat, { text: data.text || 'Tidak ada teks yang ditemukan.', edit: wait.key }, { quoted: m, ephemeralExpiration: m.expiration });
+            } catch (e) {
+                await mecha.sendMessage(m.chat, { text: `Terjadi kesalahan dalam proses OCR: ${e.message}` }, { quoted: m, ephemeralExpiration: m.expiration });
             }
-        } else {
-            m.reply('Input media dengan benar!');
-        }
+        } else m.reply('Input media dengan benar!');
     },
     limit: true
 };
