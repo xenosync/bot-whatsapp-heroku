@@ -17,6 +17,26 @@ const getCurrentJakartaTime = () => {
     return new Date(utc + (jakartaOffset * 60000)).toISOString().replace('T', ' ').split('.')[0];
 };
 
+const splitText = (text, maxLength) => {
+    const parts = [];
+    let current = '';
+
+    for (const word of text.split(' ')) {
+        if ((current + word).length > maxLength) {
+            parts.push(current.trim());
+            current = word;
+        } else {
+            current += ' ' + word;
+        }
+    }
+
+    if (current.trim().length > 0) {
+        parts.push(current.trim());
+    }
+
+    return parts;
+};
+
 const apiRequestAlyaChan = async (query) => {
     try {
         const response = await axios.get('https://api.alyachan.dev/api/bard-google-ai', {
@@ -36,11 +56,19 @@ const processRequest = async (m, mecha) => {
     await mecha.sendReact(m.chat, '🕒', m.key);
     updateChatMemory(m.chat, { role: 'user', content: m.text });
     const formattedDate = getCurrentJakartaTime();
+    
     try {
-        const responseText = await apiRequestAlyaChan(m.text);
-        updateChatMemory(m.chat, { role: 'assistant', content: responseText });
+        const textParts = splitText(m.text, 100); // Pecah teks menjadi bagian-bagian dengan panjang maksimal 100 karakter
+        let fullResponse = '';
+
+        for (const part of textParts) {
+            const responseText = await apiRequestAlyaChan(part);
+            fullResponse += responseText + ' ';
+        }
+
+        updateChatMemory(m.chat, { role: 'assistant', content: fullResponse.trim() });
         await mecha.sendReact(m.chat, '✅', m.key);
-        return `*[ BARD GOOGLE ]*\n\n${responseText}`;
+        return `*[ GOOGLE BARD ]*\n\n${fullResponse.trim()}`;
     } catch (error) {
         throw new Error(`Terjadi kesalahan: ${error.message}`);
     }
@@ -48,7 +76,7 @@ const processRequest = async (m, mecha) => {
 
 exports.run = {
     usage: [],
-    hidden: ['bard'],
+    hidden: ['ai'],
     use: 'question',
     category: 'ai',
     async: async (m, { func, mecha }) => {
