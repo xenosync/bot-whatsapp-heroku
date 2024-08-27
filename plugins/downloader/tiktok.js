@@ -1,3 +1,16 @@
+const axios = require('axios');
+function formatNumber(num) {
+  if (num >= 1000000000) {
+    return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+  }
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+  }
+  return num;
+}
 exports.run = {
   usage: ['tiktok', 'tiktokslide'],
   hidden: ['tt', 'ttslide'],
@@ -7,27 +20,23 @@ exports.run = {
     if (!m.text || !m.args[0].includes('tiktok.com')) return m.reply(func.example(m.cmd, 'https://vt.tiktok.com/ZSF4cWcA2/') || global.mess.error.url);
     mecha.sendReact(m.chat, '🕒', m.key);
     try {
-      let res = await func.fetchJson(`https://api.itsrose.rest/downloader/tiktok?url=${encodeURIComponent(m.args[0])}`, {
-        headers: {
-          'accept': 'application/json',
-          'Authorization': 'Rk-620098cf43375ac5ae53e52f6085076b'
-        }
+      let response = await axios.get(`https://api.tiklydown.eu.org/api/download/v5?url=${encodeURIComponent(m.args[0])}`, {
+        headers: { 'accept': 'application/json' }
       });
-      if (!res.status) return m.reply(global.mess.error.api);
-      let txt = `*TIKTOK - DOWNLOADER*\n◦  *Author*: ${res.author.nickname}\n◦  *Duration*: ${res.duration} seconds\n◦  *Title*: ${res.desc || 'No Description'}`;
-      if (res.type === 'video') {
-        await mecha.sendMessage(m.chat, { video: { url: res.download.nowm || res.download.wm }, caption: txt }, { quoted: m, ephemeralExpiration: m.expiration });
-        if (res.download.music) await mecha.sendMessage(m.chat, { audio: { url: res.download.music }, mimetype: 'audio/mpeg', ptt: false }, { quoted: m, ephemeralExpiration: m.expiration });
-      } else if (res.download.images && res.download.images.length > 0) {
-        txt = `*TIKTOK - SLIDE*\n- Total Images: ${res.download.images.length}\n\n_Please wait, the images are being sent..._`;
+      if (response.status !== 200) return m.reply(global.mess.error.api);
+      let res = response.data.result;
+      let txt = `*TIKTOK - DOWNLOADER*\n◦  *Author*: ${res.author.nickname}\n◦  *Duration*: ${res.duration} seconds\n◦  *Views*: ${formatNumber(res.play_count)}\n◦  *Likes*: ${formatNumber(res.digg_count)}\n◦  *Comments*: ${formatNumber(res.comment_count)}\n◦  *Shares*: ${formatNumber(res.share_count)}\n◦  *Downloads*: ${formatNumber(res.download_count)}\n◦  *Title*: ${res.title || 'No Description'}`.trimEnd();
+      if (res.duration === 0 && res.images && res.images.length > 0) {
+        txt = `*TIKTOK - SLIDE*\n- Total Images: ${res.images.length}\n\n_Please wait, the images are being sent..._`;
         await mecha.sendMessage(m.chat, { text: txt }, { quoted: m, ephemeralExpiration: m.expiration });
-        await Promise.all(res.download.images.map(url => mecha.sendMessage(m.chat, { image: { url } }, { quoted: m, ephemeralExpiration: m.expiration })));
-        if (res.download.music) await mecha.sendMessage(m.chat, { audio: { url: res.download.music }, mimetype: 'audio/mpeg', ptt: false }, { quoted: m, ephemeralExpiration: m.expiration });
+        await Promise.all(res.images.map(url => mecha.sendMessage(m.chat, { image: { url } }, { quoted: m, ephemeralExpiration: m.expiration })));
+        if (res.music) await mecha.sendMessage(m.chat, { audio: { url: res.music }, mimetype: 'audio/mpeg', ptt: false }, { quoted: m, ephemeralExpiration: m.expiration });
       } else {
-        m.reply('Content not found.');
+        await mecha.sendMessage(m.chat, { video: { url: res.hdplay || res.play }, caption: txt }, { quoted: m, ephemeralExpiration: m.expiration });
+        if (res.music) await mecha.sendMessage(m.chat, { audio: { url: res.music }, mimetype: 'audio/mpeg', ptt: false }, { quoted: m, ephemeralExpiration: m.expiration });
       }
-    } catch {
-      m.reply('Maaf terjadi kesalahan.');
+    } catch (error) {
+      await mecha.sendMessage(m.chat, { text: `Maaf terjadi kesalahan:\n\nAn error occurred: ${error.message}\n\nStack Trace:\n${error.stack}` }, { quoted: m, ephemeralExpiration: m.expiration });
     }
   },
   premium: false,
