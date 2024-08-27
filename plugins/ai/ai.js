@@ -1,13 +1,16 @@
 const axios = require('axios');
-const Groq = require('groq-sdk');
+const Groq = require('groq-sdk'); // Pastikan modul ini terinstal: npm install --save groq-sdk
 const fs = require('fs');
 const path = require('path');
+
 const apiKey = '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';
 const groq = new Groq({ apiKey });
 const dataFilePath = path.join(__dirname, 'conversations2.json');
 
+// Fungsi untuk membersihkan teks dari karakter markdown
 const cleanResponse = text => text.replace(/\*\*/g, '*').replace(/_/g, '').replace(/`|```/g, '').trim();
 
+// Fungsi untuk menghapus memori percakapan berdasarkan session ID
 const deleteMemory = sessionId => {
     let conversations = fs.existsSync(dataFilePath) ? JSON.parse(fs.readFileSync(dataFilePath)) : {};
     if (conversations[sessionId]) {
@@ -17,18 +20,21 @@ const deleteMemory = sessionId => {
     }
 };
 
+// Fungsi untuk menyimpan pesan ke dalam file JSON
 const saveMessage = (sessionId, role, content) => {
     let conversations = fs.existsSync(dataFilePath) ? JSON.parse(fs.readFileSync(dataFilePath)) : {};
     if (!conversations[sessionId]) conversations[sessionId] = [];
     conversations[sessionId].push({ role, content });
     fs.writeFileSync(dataFilePath, JSON.stringify(conversations, null, 2));
-    setTimeout(() => deleteMemory(sessionId), 10 * 60 * 1000);
+    setTimeout(() => deleteMemory(sessionId), 10 * 60 * 1000); // Hapus memori setelah 10 menit
 };
 
+// Fungsi untuk mendapatkan sejarah percakapan berdasarkan session ID
 const getConversationHistory = sessionId => {
     return fs.existsSync(dataFilePath) ? JSON.parse(fs.readFileSync(dataFilePath))[sessionId] || [] : [];
 };
 
+// Fungsi utama AI untuk menghasilkan respons
 const ai = async (sessionId, userMessage) => {
     const history = getConversationHistory(sessionId);
     const messages = [
@@ -66,6 +72,7 @@ const ai = async (sessionId, userMessage) => {
     }
 };
 
+// Fungsi untuk memproses permintaan user
 const processRequest = async (m, mecha) => {
     if (!m.text || typeof m.text !== 'string') return m.reply('Berikan pertanyaan atau perintah yang jelas.');
     await mecha.sendReact(m.chat, '🕒', m.key);
@@ -80,6 +87,7 @@ const processRequest = async (m, mecha) => {
     }
 };
 
+// Ekspor fungsi run untuk digunakan di tempat lain
 exports.run = {
     usage: [],
     hidden: ['ai'],
