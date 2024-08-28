@@ -1,65 +1,50 @@
 const axios = require('axios');
-
-/*
-Created by : KiiCode
-Source : https://api.elxyz.me/shorturl/1f1f7e6f
-Note : Hapus cr yatim
-*/
-
-const tiktokStalk = async (username) => {
-const url = 'https://tools.revesery.com/stalktk/revesery.php';
-try {
-const response = await axios.post(url, null, { params: { username } });
-if (response.status !== 200) {
-throw new Error('Network response was not ok');
+async function ttStalk(username) {
+    try {
+        const { data } = await axios.get(`https://api.alyachan.dev/api/tiktok-stalk?username=${username}&apikey=6nY0bL`);
+        if (!data.status) {
+            throw new Error('Failed to retrieve data');
+        }
+        const userInfo = data.data;
+        const result = {
+            username: userInfo.username,
+            fullName: userInfo.name,
+            followers: userInfo.followers,
+            following: userInfo.following,
+            likes: userInfo.likes,
+            totalPosts: userInfo.posts,
+            bio: userInfo.bio,
+            profilePic: userInfo.photo,
+        };
+        return result;
+    } catch (err) {
+        throw err;
+    }
 }
-const data = response.data;
-
-const result = {
-photo: data.photo,
-username,
-name: data.name,
-bio: data.bio,
-followers: data.followers,
-following: data.following,
-likes: data.likes,
-posts: data.posts
-};
-
-return result;
-} catch (error) {
-throw new Error('Failed to scrape data:', error);
-}
-};
-
 exports.run = {
-usage: ['tiktokstalk'],
-hidden: ['ttstalk'],
-use: 'username',
-category: 'searching',
-async: async (m, { func, mecha }) => {
-if (!m.text) return m.reply(func.example(m.cmd, 'suryaskylark05'));
-mecha.sendReact(m.chat, '🕒', m.key);
-try {
-const res = await tiktokStalk(m.text);
-let txt = `乂  *TIKTOK STALKER*\n`;
-txt += `\n◦  Name: ${res.name}`;
-txt += `\n◦  Username: ${res.username}`;
-txt += `\n◦  Followers: ${res.followers}`;
-txt += `\n◦  Following: ${res.following}`;
-txt += `\n◦  Bio: ${res.bio}`;
-txt += `\n◦  Likes: ${res.likes}`;
-txt += `\n◦  Posts: ${res.posts}`;
-mecha.sendMessageModify(m.chat, txt, m, {
-title: 'TIKTOK STALKER',
-body: global.header,
-thumbnail: await mecha.resize(res.photo, 300, 175),
-largeThumb: true,
-expiration: m.expiration
-});
-} catch (err) {
-m.reply('Username tidak ditemukan!');
-}
-},
-limit: 2
+    usage: ['ttstalk'],
+    use: 'username',
+    category: 'searching',
+    async: async (m, { func, mecha }) => {
+        if (!m.text) {
+            m.reply('Mohon input username TikTok yang akan di-stalk.');
+            return;
+        }
+        mecha.sendReact(m.chat, '🕒', m.key);
+        try {
+            const result = await ttStalk(m.text);
+            const stalkMessage = `*TIKTOK STALK*\n\n` +
+                `*Username:* ${result.username}\n` +
+                `*Full Name:* ${result.fullName}\n` +
+                `*Followers:* ${result.followers.toLocaleString()}\n` +
+                `*Following:* ${result.following.toLocaleString()}\n` +
+                `*Likes:* ${result.likes.toLocaleString()}\n` +
+                `*Total Posts:* ${result.totalPosts.toLocaleString()}\n` +
+                `*Bio:* ${result.bio || 'No bio available'}`;
+            mecha.sendMessage(m.chat, { image: { url: result.profilePic }, caption: stalkMessage }, { quoted: m, ephemeralExpiration: m.expiration });
+        } catch (error) {
+            console.error('Error stalking TikTok profile:', error);
+            mecha.reply(m.chat, 'Terjadi kesalahan saat menyelidiki profil TikTok. Pastikan username yang dimasukkan benar dan coba lagi.', m);
+        }
+    }
 }
