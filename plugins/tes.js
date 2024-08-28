@@ -46,7 +46,6 @@ exports.run = {
             const data = quoted.mimetype === 'text/plain' || !quoted.mimetype ? quoted.text : null;
             if (!data) return m.reply('Harap reply ke pesan teks.');
 
-            // Daftar 50 kata terlarang
             const forbiddenWords = [
                 "/* drug */", "/* violence */", "/* adult content */", "/* hate speech */", "/* self-harm */",
                 "/* suicide */", "/* illegal activities */", "/* terrorism */", "/* harassment */", "/* exploitation */",
@@ -97,7 +96,7 @@ exports.run = {
             const encryptedInfo = formatResponse(response);
 
             await mecha.sendReact(m.chat, '✅', m.key);
-            await m.reply(encryptedInfo); // Kirim link hasil enkripsi
+            await m.reply(encryptedInfo);
         } catch (e) {
             console.error(e);
             m.reply(`Terjadi kesalahan saat meng-enkrip pesan: ${e.message}`);
