@@ -2,15 +2,13 @@ const axios = require('axios');
 
 async function ssweb(url) {
     const apiKey = 'syauqi27';
-    const apiUrl = `https://skizo.tech/api/ssweb?apikey=${apiKey}&url=${encodeURIComponent(url)}&type=&language=id&fullpage=0&width=1080&height=1920`;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = `https://${url}`;
+    }
+    const apiUrl = `https://skizo.tech/api/ssweb?apikey=${apiKey}&url=${encodeURIComponent(url)}&type=&language=id&fullpage=0&width=720&height=1280`;
     try {
-        const response = await axios.get(apiUrl, { responseType: 'arraybuffer' });
-        const { data, headers } = response;
-        if (headers['content-type'].includes('image')) {
-            return { status: true, result: data };
-        } else {
-            return { status: false, message: 'Gagal mengambil tangkapan layar.' };
-        }
+        const { data, headers } = await axios.get(apiUrl, { responseType: 'arraybuffer' });
+        return headers['content-type'].includes('image') ? { status: true, result: data } : { status: false, message: 'Gagal mengambil tangkapan layar.' };
     } catch (error) {
         return { status: false, message: error.message };
     }
@@ -21,7 +19,7 @@ exports.run = {
     use: 'url',
     category: 'tools',
     async: async (m, { func, mecha }) => {
-        if (!m.text || !func.isUrl(m.args[0])) {
+        if (!m.text || !/^(https?:\/\/)?([\w-]+(\.[\w-]+)+)([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])?$/i.test(m.text)) {
             return m.reply('Masukkan URL yang valid.');
         }
         mecha.sendReact(m.chat, '🕒', m.key);
