@@ -23,7 +23,7 @@ async function processMessage(m, { func, mecha }) {
 }
 
 function formatResponse(response) {
-  return response.url ? `*Paste Created Successfully!*\n\n*URL:*\n${response.url}` : `*Error:* ${response.error}`;
+  return response.url ? `${response.url}` : `*Error:* ${response.error}`;
 }
 
 exports.run = {
