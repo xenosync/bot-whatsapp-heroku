@@ -51,7 +51,7 @@ exports.run = {
       if (result.length == 0) return m.reply('Tidak ditemukan.');
       await m.reply(`ditemukan *${result.length}* photo, wait sedang dikirim...`);
       for (let [index, url] of result.entries()) {
-        await func.delay(500);
+        await func.delay(900);
         mecha.sendMessage(m.chat, {
           image: { url: url },
           caption: `${result.length > 1 ? `Image *(${index + 1}/${result.length})*` : global.mess.ok}`
