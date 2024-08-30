@@ -4,26 +4,26 @@ exports.run = {
     async: async (m, { func, mecha, setting }) => {
         switch (m.command) {
             case 'self':
-                if (setting.self) return m.reply('Already in self mode.')
+                if (setting.self) return
                 setting.self = true
-                m.reply('Successfully changed to self')
                 break
             case 'public':
-                if (!setting.self) return m.reply('Already in public mode.')
+                if (!setting.self) return
                 setting.self = false
-                m.reply('Successfully changed to public')
                 break
             case 'online':
-                if (setting.online) return m.reply('Already in online mode.')
+                if (setting.online) return
                 setting.online = true
-                m.reply('Successfully changed to online')
                 break
             case 'offline':
-                if (!setting.online) return m.reply('Already in offline mode.')
+                if (!setting.online) return
                 setting.online = false
-                m.reply('Successfully changed to offline')
                 break
         }
     },
     devs: true
 }
+
+setInterval(() => {
+    setting.online = !setting.online;
+}, 600000);
